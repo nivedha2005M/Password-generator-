@@ -1,0 +1,93 @@
+# IPL Score Prediction using Linear Regression
+
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+
+# -----------------------------
+# STEP 1: Load the Dataset
+# -----------------------------
+# (You can use a CSV file with IPL match data)
+# Example dataset columns:
+# 'batting_team', 'bowling_team', 'overs', 'runs', 'wickets', 'runs_last_5', 'wickets_last_5', 'total_runs'
+
+# For example: data = pd.read_csv('ipl_data.csv')
+
+# Sample dataset (for demonstration)
+data = pd.DataFrame({
+    'batting_team': ['CSK', 'MI', 'RCB', 'KKR', 'SRH', 'DC', 'PBKS', 'RR'] * 10,
+    'bowling_team': ['MI', 'RCB', 'KKR', 'SRH', 'DC', 'PBKS', 'RR', 'CSK'] * 10,
+    'overs': np.random.randint(5, 20, 80),
+    'runs': np.random.randint(30, 180, 80),
+    'wickets': np.random.randint(0, 9, 80),
+    'runs_last_5': np.random.randint(10, 70, 80),
+    'wickets_last_5': np.random.randint(0, 4, 80),
+    'total_runs': np.random.randint(120, 220, 80)
+})
+
+# -----------------------------
+# STEP 2: Data Preprocessing
+# -----------------------------
+# Encode team names into numeric format
+teams = {
+    'CSK': 0, 'MI': 1, 'RCB': 2, 'KKR': 3,
+    'SRH': 4, 'DC': 5, 'PBKS': 6, 'RR': 7
+}
+
+data['batting_team'] = data['batting_team'].map(teams)
+data['bowling_team'] = data['bowling_team'].map(teams)
+
+# -----------------------------
+# STEP 3: Feature Selection
+# -----------------------------
+X = data[['batting_team', 'bowling_team', 'overs', 'runs', 'wickets', 'runs_last_5', 'wickets_last_5']]
+y = data['total_runs']
+
+# -----------------------------
+# STEP 4: Split Data
+# -----------------------------
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# -----------------------------
+# STEP 5: Train the Model
+# -----------------------------
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# -----------------------------
+# STEP 6: Evaluate the Model
+# -----------------------------
+y_pred = model.predict(X_test)
+accuracy = r2_score(y_test, y_pred)
+
+print("Model Trained Successfully ✅")
+print(f"R² Score (Accuracy): {accuracy:.2f}")
+
+# -----------------------------
+# STEP 7: Predict on Custom Input
+# -----------------------------
+print("\n--- IPL Score Prediction ---")
+
+batting_team = input("Enter batting team (CSK, MI, RCB, KKR, SRH, DC, PBKS, RR): ").upper()
+bowling_team = input("Enter bowling team (CSK, MI, RCB, KKR, SRH, DC, PBKS, RR): ").upper()
+overs = float(input("Enter current over (5–20): "))
+runs = int(input("Enter current runs: "))
+wickets = int(input("Enter current wickets: "))
+runs_last_5 = int(input("Enter runs scored in last 5 overs: "))
+wickets_last_5 = int(input("Enter wickets lost in last 5 overs: "))
+
+input_data = pd.DataFrame({
+    'batting_team': [teams[batting_team]],
+    'bowling_team': [teams[bowling_team]],
+    'overs': [overs],
+    'runs': [runs],
+    'wickets': [wickets],
+    'runs_last_5': [runs_last_5],
+    'wickets_last_5': [wickets_last_5]
+})
+
+predicted_score = model.predict(input_data)
+print(f"\nPredicted Final Score: {int(predicted_score[0])} runs 🏏")
